@@ -17,20 +17,20 @@ cursor.execute(sql)
 
 class First_Spider:
     def getpage(self, name, suffix='.com'):
-        data = {"d_name":"","dtype":"common"}
-        data["d_name"] = name+suffix
+        data = {"name":"","dtype":"common"}
+        data["name"] = name+suffix
         post_data = urllib.urlencode(data)
         cj = cookielib.CookieJar
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-        headers = {"User-agent":"Mozilla/5.0 (Windows NT 6.1; rv:32.0) Gecko/20100101 Firefox/32.0"}
-        req = urllib2.Request("http://www.zgsj.com/domain_reg/domaintrans.asp",post_data,headers)
+        headers = {"User-agent": "Mozilla/5.0 (Windows NT 6.1; rv:32.0) Gecko/20100101 Firefox/32.0"}
+        req = urllib2.Request("http://www.zgsj.com/domain_reg/domaintrans.asp", post_data, headers)
         content = urllib2.urlopen(req)
-        c=content.read()
+        c = content.read()
         pattern = re.compile('color:green;')
         p = pattern.findall(c)
         if p:
             print name
-            sql = "insert into test(name, suffix) values('%s', '%s')" % (name,suffix)
+            sql = "insert into test(name, suffix) values('%s', '%s')" % (name, suffix)
             try:
                 cursor.execute(sql)
             except Exception, e:
