@@ -1,0 +1,52 @@
+# 导入模块 urllib2
+import urllib2
+# 随便查询一篇文章，比如On random graph。对每一个查询google
+query = 'On+random+graph'
+url = 'http://http://www.baidu.com/baidu?word=中国将主办G20峰会&ie=utf-8'
+# 设置头文件。抓取有些的网页不需要专门设置头文件
+header = {'Host': 'scholar.google.com',
+'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:26.0) Gecko/20100101 Firefox/26.0',
+'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+'Accept-Encoding': 'gzip, deflate',-google 1point3acres
+'Connection': 'keep-alive'}
+# 建立连接请求，这时google的服务器返回页面信息给con这个变量，con是一个对象
+req = urllib2.Request(url, headers = header)
+con = urllib2.urlopen( req )
+# 对con这个对象调用read()方法，返回的是html页面，也就是有html标签的纯文本
+doc = con.read()
+# 关闭连接。就像读完文件要关闭文件一样，如果不关闭有时可以、但有时会有问题，
+# 所以作为一个守法的好公民，还是关闭连接好了。
+con.close()
+
+# 导入BeautifulSoup模块和re模块，re是python中正则表达式的模块
+import BeautifulSoup
+import re
+# 生成一个soup对象，doc就是步骤二中提到的
+soup = BeautifulSoup.BeautifulSoup(doc)
+# 抓取论文标题，作者，简短描述，引用次数，版本数，引用它的文章列表的超链接
+# 这里还用了一些正则表达式，不熟悉的先无知它好了。至于'class' : 'gs_rt'中
+# 'gs_rt'是怎么来的，这个是分析html文件肉眼看出来的。上面提到的firebug插件
+# 让这个变的很简单，只要一点网页，就可以知道对应的html 标签的位置和属性，
+# 相当好用。
+paper_name = soup.html.body.find('h3', {'class' : 'gs_rt'}).text
+paper_name = re.sub(r'\[.*\]', '', paper_name) # eliminate '[]' tags like '[PDF]'
+paper_author = soup.html.body.find('div', {'class' : 'gs_a'}).text
+paper_desc = soup.html.body.find('div', {'class' : 'gs_rs'}).text
+temp_str = soup.html.body.find('div', {'class' : 'gs_fl'}).text
+temp_re = re.match(r'[A-Za-z\s]+(\d*)[A-Za-z\s]+(\d*)', temp_str)
+citeTimes = temp_re.group(1)
+versionNum = temp_re.group(2)
+if citeTimes == '':
+  citeTimes = '0'
+if versionNum == '':
+  versionNum = '0'
+citedPaper_href = soup.html.body.find('div', {'class' : 'gs_fl'}).a.attrs[0][1]
+
+# 打开文件1.txt，生成对象file,这个文件可以是不存在的，参数a表示往里面添加。. 鍥磋鎴戜滑@1point 3 acres
+# 还有别的参数，比如'r'只能读但不能写入，'w'可以写入但是会删除原来的记录等等
+file = open('1.txt','a')
+line = paper_name + '#' + paper_author + '#' + paper_desc + '#' + citeTimes + '\n'
+# 对象file的write方法将字符串line写入file中
+file = file.write(line)
+# 再一次的，做个随手关闭文件的好青年
+file.close()
